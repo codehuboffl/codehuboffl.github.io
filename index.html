@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Page</title>
+    <style>
+        * {  
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 2s ease-in;
+        }
+
+        .chat-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .chat-button:hover {
+            background: white;
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .watermark {
+            position: relative;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+            letter-spacing: 1px;
+            transition: opacity 0.3s ease;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            padding-top: 10px;
+        }
+
+        .watermark:hover {
+            opacity: 0.8;
+        }
+
+        @keyframes fadeInWatermark {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .watermark {
+            animation: fadeInWatermark 1.5s ease-out 1s forwards;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="content">
+        <h1>Welcome</h1>
+        <button class="chat-button" id="chatButton">Chat Now</button>
+        <div class="watermark">© developed by faseed</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Three.js animation setup
+        const canvas = document.querySelector('#canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas });
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // Create animated particles with colors
+        const particles = new THREE.BufferGeometry();
+        const particleCount = 5000;
+        const posArray = new Float32Array(particleCount * 3);
+        const colorsArray = new Float32Array(particleCount * 3);
+
+        for(let i = 0; i < particleCount * 3; i += 3) {
+            // Position
+            posArray[i] = (Math.random() - 0.5) * 5;
+            posArray[i + 1] = (Math.random() - 0.5) * 5;
+            posArray[i + 2] = (Math.random() - 0.5) * 5;
+
+            // Colors - RGB values between 0 and 1
+            colorsArray[i] = Math.random();  // R
+            colorsArray[i + 1] = Math.random();  // G
+            colorsArray[i + 2] = Math.random();  // B
+        }
+
+        particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particles.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 0.01,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+        });
+
+        const particleMesh = new THREE.Points(particles, material);
+        scene.add(particleMesh);
+
+        camera.position.z = 2;
+
+        // Animation with color shifting
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.001;
+
+            particleMesh.rotation.x += 0.0005;
+            particleMesh.rotation.y += 0.0005;
+
+            // Update colors over time for a rainbow effect
+            const colors = particles.attributes.color;
+            for(let i = 0; i < colors.array.length; i += 3) {
+                colors.array[i] = Math.sin(time + i) * 0.5 + 0.5;     // R
+                colors.array[i + 1] = Math.cos(time + i) * 0.5 + 0.5; // G
+                colors.array[i + 2] = Math.sin(time + i) * 0.5 + 0.5; // B
+            }
+            colors.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener('resize', onWindowResize);
+        onWindowResize();
+        animate();
+
+        // Add this with your other JavaScript code
+        document.getElementById('chatButton').addEventListener('click', function() {
+            // You can add transition effects or other logic here
+            window.location.href = 'https://react-chat-app-codehub.web.app/';
+        });
+    </script>
+</body>
+</html>
